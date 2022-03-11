@@ -11,65 +11,41 @@ var middleware = require("../middleware/middleware.js");
 HandlerGenerator = new HandlerGenerator();
 
 /* GET home page. */
-router.get('/', middleware.checkToken, HandlerGenerator.index);
+router.get("/", middleware.checkToken, HandlerGenerator.index);
 
-router.post( '/login', HandlerGenerator.login);
+router.post("/login", HandlerGenerator.login);
 
 const schema = Joi.object({
   name: Joi.string().min(3).max(30).required(),
 });
 
-router.get("/movies", function (req, res, next) {
-  movie.getMovies().then((movies) => {
-    console.log("Movies", movies);
-    res.send(movies);
-  });
-});
+//Ruta de registro
+router.post("/register", HandlerGenerator.register);
 
-router.get("/movies/:id", function (req, res, next) {
-  movie.getMovie(req.params.id).then((movie) => {
-    console.log("Movies", movie);
-    if (movie === null) {
-      res.status(404).send("La película con el id no existe");
-    }
-    res.send(movie);
-  });
-});
+//Ruta de todas las peliculas
+router.get("/movies", middleware.checkToken, HandlerGenerator.getMovies);
 
-router.post("/movies", function (req, res, next) {
-  const { error } = schema.validate(req.body);
-  if (error) {
-    return res.status(404).send(error);
-  }
+//Ruta de una pelicula
+router.get("/movies/:id", middleware.checkToken, HandlerGenerator.getMovie);
 
-  movie.createMovie(req.body).then((movie) => {
-    console.log("Movies", movie);
-    res.send(movie);
-  });
-});
+//Ruta de crear una pelicula
+router.post("/movies", middleware.checkToken, HandlerGenerator.createMovie);
 
-router.put("/movies/:id", function (req, res, next) {
-  movie.updateMovie(req.params.id, req.body).then((movie) => {
-    console.log("movie", movie);
-    if (movie.matchedCount === 0) {
-      return res.status(404).send("La película con el id no existe");
-    }
-    res.send(movie);
-  });
-});
+//Ruta de actualizar una pelicula
+router.put("/movies/:id", middleware.checkToken, HandlerGenerator.updateMovie);
 
-router.delete("/movies/:id", function (req, res, next) {
-  movie.deleteMovie(req.params.id).then((movie) => {
-    console.log("movie", movie);
-    if (movie.deletedCount === 0) {
-      return res.status(404).send("La película con el id no existe");
-    }
-    res.sendStatus(204);
-  });
-});
+//Ruta de eliminar una pelicula
+router.delete(
+  "/movies/:id",
+  middleware.checkToken,
+  HandlerGenerator.deleteMovie
+);
 
-router.get("/users/", ((req, res) => {
-
-}))
+router.get(
+  "/users/",
+  middleware.checkToken,
+  middleware.checkAdminRole,
+  HandlerGenerator.getUsers
+);
 
 module.exports = router;

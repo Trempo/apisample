@@ -1,5 +1,37 @@
 let jwt = require("jsonwebtoken");
-const config = require("./config.js");
+const config = require("../config.js");
+let users = require("../controllers/users");
+
+let checkAdminRole = (req, res, next) => {
+  let token = req.headers["x-access-token"] || req.headers["authorization"];
+  if (token) {
+    if (token.startsWith("Bearer ")) {
+      token = token.slice(7, token.length);
+      jwt.verify(token, config.secret, (err, decoded) => {
+        if (err) {
+          console.log(err);
+          return res.status(401).json({
+            message: "Invalid token",
+          });
+        } else {
+          users.getUserByToken(token).then((user) => {
+            if (user.role === "admin") {
+              next();
+            } else {
+              return res.status(401).json({
+                message: "Unauthorized",
+              });
+            }
+          });
+        }
+      });
+    }
+  } else {
+    return res.status(401).send({
+      message: "No token provided",
+    });
+  }
+};
 
 // Función encargada de realizar la validación del token y que es directamente consumida por server.js
 let checkToken = (req, res, next) => {
@@ -38,4 +70,5 @@ let checkToken = (req, res, next) => {
 
 module.exports = {
   checkToken: checkToken,
+  checkAdminRole: checkAdminRole,
 };
