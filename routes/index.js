@@ -5,6 +5,16 @@ const movie = require("../controllers/movie");
 
 var router = express.Router();
 
+var HandlerGenerator = require("../handlegenerator.js");
+var middleware = require("../middleware/middleware.js");
+
+HandlerGenerator = new HandlerGenerator();
+
+/* GET home page. */
+router.get('/', middleware.checkToken, HandlerGenerator.index);
+
+router.post( '/login', HandlerGenerator.login);
+
 const schema = Joi.object({
   name: Joi.string().min(3).max(30).required(),
 });
@@ -57,5 +67,9 @@ router.delete("/movies/:id", function (req, res, next) {
     res.sendStatus(204);
   });
 });
+
+router.get("/users/", ((req, res) => {
+
+}))
 
 module.exports = router;

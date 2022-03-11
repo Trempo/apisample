@@ -48,9 +48,9 @@ function deleteUser(id) {
 
 }
 
-const user = {getUsers, getUser, createUser, updateUser, deleteUser};
-
 function hash(string) {
     return createHash('sha256').update(string).digest('hex');
 }
+
+const user = {getUsers, getUser, createUser, updateUser, deleteUser, hash};
 module.exports = user;
